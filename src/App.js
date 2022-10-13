@@ -1,23 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useRef } from "react";
+import "./App.css";
+
+let video = null;
+let canvas = null;
+let context = null;
 
 function App() {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    canvas = canvasRef.current;
+    context = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.height;
+  }, []);
+
+  let promise = navigator.mediaDevices.getUserMedia({ video: true });
+  promise
+    .then((signal) => {
+      video = document.createElement("video");
+      video.srcObject = signal;
+      video.play();
+      video.onloadeddata = () => {
+        context.drawImage(video, 0, 0);
+      };
+    })
+    .catch((error) => alert(error));
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <canvas ref={canvasRef} />
     </div>
   );
 }
